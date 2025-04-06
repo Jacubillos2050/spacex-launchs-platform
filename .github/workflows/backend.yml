@@ -1,0 +1,44 @@
+name: Lambda CI/CD
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  lambda-ci:
+    name: Test & Deploy Lambda
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v3
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+
+      - name: 📦 Install dependencies
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements-dev.txt
+
+      - name: ✅ Run tests & coverage
+        run: |
+          source venv/bin/activate
+          PYTHONPATH=. coverage run -m pytest lambdafn/tests
+          coverage report -m
+
+      - name: ☁️ Setup Serverless Framework
+        uses: serverless/github-action@v3.2
+
+      - name: 🚀 Deploy Lambda with Serverless
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          npm install -g serverless
+          serverless deploy

@@ -1,0 +1,59 @@
+service: spacex-launch-service
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: python3.9
+  region: us-east-1
+  memorySize: 256
+  timeout: 30
+  stage: dev
+
+  environment:
+    TABLE_NAME: ${self:provider.stage}-SpaceXLaunches
+
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:GetItem
+            - dynamodb:Scan
+            - dynamodb:DescribeTable
+          Resource:
+            - arn:aws:dynamodb:${self:provider.region}:${aws:accountId}:table/${self:provider.stage}-SpaceXLaunches
+
+functions:
+  fetchLaunches:
+    handler: lambdafn.handler.main  # Asegúrate que handler.py tenga `def main(event, context)`
+    description: "Fetches SpaceX launches and stores them in DynamoDB"
+
+    events:
+      - schedule:
+          rate: rate(6 hours)
+          enabled: true
+      - http:
+          path: run
+          method: get
+
+    layers:
+      - arn:aws:lambda:${self:provider.region}:${aws:accountId}:layer:spacex-deps:1  # Reemplaza con tu ARN real si varía
+
+resources:
+  Resources:
+    SpaceXLaunchesTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.stage}-SpaceXLaunches
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        Tags:
+          - Key: Project
+            Value: SpaceX

@@ -1,0 +1,5 @@
+pytest
+coverage
+moto[dynamodb2]
+requests
+boto3
