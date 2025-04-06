@@ -7,38 +7,67 @@ on:
 
 jobs:
   lambda-ci:
-    name: Test & Deploy Lambda
+    name: 🧪 Test & 🚀 Deploy Lambda
     runs-on: ubuntu-latest
 
     steps:
+      # 1. Clonar el repositorio
       - name: ⬇️ Checkout repo
         uses: actions/checkout@v3
 
+      # 2. Configurar Python
       - name: 🐍 Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.12"
 
+      # 3. Crear entorno virtual e instalar dependencias
       - name: 📦 Install dependencies
         run: |
+          cd backend/lambdafn
           python -m venv venv
           source venv/bin/activate
           pip install --upgrade pip
           pip install -r requirements-dev.txt
 
-      - name: ✅ Run tests & coverage
+      # 4. Ejecutar pruebas y cobertura
+      - name: ✅ Run tests with coverage
         run: |
+          cd backend/lambdafn
           source venv/bin/activate
-          PYTHONPATH=. coverage run -m pytest lambdafn/tests
+          PYTHONPATH=. coverage run -m pytest tests
           coverage report -m
+          coverage xml
 
-      - name: ☁️ Setup Serverless Framework
-        uses: serverless/github-action@v3.2
+      # 5. Subir reporte de cobertura como artefacto
+      - name: 📊 Upload coverage to GitHub summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: backend/lambdafn/coverage.xml
 
-      - name: 🚀 Deploy Lambda with Serverless
+      # 6. Instalar Serverless Framework manualmente
+      - name: ☁️ Install Serverless CLI
+        run: npm install -g serverless
+
+      # 7. Validar y desplegar con Serverless
+      - name: 🚀 Deploy Lambda to AWS
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
-          npm install -g serverless
-          serverless deploy
+          cd backend
+          sls print --stage dev
+          sls deploy --stage dev
+
+      # 8. Éxito
+      - name: ✅ Deployment successful
+        if: success()
+        run: echo "Lambda deployment successful 🎉"
+
+      # 9. Falla con mensaje
+      - name: ⚠️ Deployment failed
+        if: failure()
+        run: |
+          echo "❌ Deployment failed. You can rollback manually with:"
+          echo "serverless rollback --timestamp <timestamp>"

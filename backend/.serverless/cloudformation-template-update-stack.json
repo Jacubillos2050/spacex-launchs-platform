@@ -77,6 +77,12 @@
         "LogGroupName": "/aws/lambda/spacex-launch-service-dev-fetchLaunches"
       }
     },
+    "GetLaunchesLogGroup": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": "/aws/lambda/spacex-launch-service-dev-getLaunches"
+      }
+    },
     "IamRoleLambdaExecution": {
       "Type": "AWS::IAM::Role",
       "Properties": {
@@ -173,7 +179,7 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/spacex-launch-service/dev/1743910974210-2025-04-06T03:42:54.210Z/spacex-launch-service.zip"
+          "S3Key": "serverless/spacex-launch-service/dev/1743953027051-2025-04-06T15:23:47.051Z/spacex-launch-service.zip"
         },
         "Handler": "lambdafn.handler.main",
         "Runtime": "python3.9",
@@ -200,15 +206,57 @@
         "FetchLaunchesLogGroup"
       ]
     },
-    "FetchLaunchesLambdaVersionr8Hgvc5cAjouGJxJIifAZCv2xzQoUXUxnYW4LTVhL0": {
+    "GetLaunchesLambdaFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "ServerlessDeploymentBucket"
+          },
+          "S3Key": "serverless/spacex-launch-service/dev/1743953027051-2025-04-06T15:23:47.051Z/spacex-launch-service.zip"
+        },
+        "Handler": "lambdafn.get.handler",
+        "Runtime": "python3.9",
+        "FunctionName": "spacex-launch-service-dev-getLaunches",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Description": "Returns all launches from DynamoDB",
+        "Environment": {
+          "Variables": {
+            "TABLE_NAME": "dev-SpaceXLaunches"
+          }
+        },
+        "Role": {
+          "Fn::GetAtt": [
+            "IamRoleLambdaExecution",
+            "Arn"
+          ]
+        }
+      },
+      "DependsOn": [
+        "GetLaunchesLogGroup"
+      ]
+    },
+    "FetchLaunchesLambdaVersionpHCmvf4T0Xx6QTu4iow6RpcHxGQsgEUMjssmS3OE": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "FetchLaunchesLambdaFunction"
         },
-        "CodeSha256": "5KwpoVY3+wO/ZJNQ1xEUnVINObX6YALb5whu5qtumdA=",
+        "CodeSha256": "6uGHZ/ufrFtEF5HaaHzbyopTZvENtgzsR9wzWAfR8V0=",
         "Description": "Fetches SpaceX launches and stores them in DynamoDB"
+      }
+    },
+    "GetLaunchesLambdaVersion2kuX3apTh1L1eBod85msjO5HzEiIo3E7XgKggpJ4": {
+      "Type": "AWS::Lambda::Version",
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "GetLaunchesLambdaFunction"
+        },
+        "CodeSha256": "6uGHZ/ufrFtEF5HaaHzbyopTZvENtgzsR9wzWAfR8V0=",
+        "Description": "Returns all launches from DynamoDB"
       }
     },
     "FetchLaunchesEventsRuleSchedule1": {
@@ -275,6 +323,66 @@
         }
       }
     },
+    "ApiGatewayResourceLaunches": {
+      "Type": "AWS::ApiGateway::Resource",
+      "Properties": {
+        "ParentId": {
+          "Fn::GetAtt": [
+            "ApiGatewayRestApi",
+            "RootResourceId"
+          ]
+        },
+        "PathPart": "launches",
+        "RestApiId": {
+          "Ref": "ApiGatewayRestApi"
+        }
+      }
+    },
+    "ApiGatewayMethodLaunchesOptions": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "AuthorizationType": "NONE",
+        "HttpMethod": "OPTIONS",
+        "MethodResponses": [
+          {
+            "StatusCode": "200",
+            "ResponseParameters": {
+              "method.response.header.Access-Control-Allow-Origin": true,
+              "method.response.header.Access-Control-Allow-Headers": true,
+              "method.response.header.Access-Control-Allow-Methods": true
+            },
+            "ResponseModels": {}
+          }
+        ],
+        "RequestParameters": {},
+        "Integration": {
+          "Type": "MOCK",
+          "RequestTemplates": {
+            "application/json": "{statusCode:200}"
+          },
+          "ContentHandling": "CONVERT_TO_TEXT",
+          "IntegrationResponses": [
+            {
+              "StatusCode": "200",
+              "ResponseParameters": {
+                "method.response.header.Access-Control-Allow-Origin": "'*'",
+                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent,X-Amzn-Trace-Id'",
+                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET'"
+              },
+              "ResponseTemplates": {
+                "application/json": ""
+              }
+            }
+          ]
+        },
+        "ResourceId": {
+          "Ref": "ApiGatewayResourceLaunches"
+        },
+        "RestApiId": {
+          "Ref": "ApiGatewayRestApi"
+        }
+      }
+    },
     "ApiGatewayMethodRunGet": {
       "Type": "AWS::ApiGateway::Method",
       "Properties": {
@@ -321,7 +429,53 @@
         "FetchLaunchesLambdaPermissionApiGateway"
       ]
     },
-    "ApiGatewayDeployment1743910969225": {
+    "ApiGatewayMethodLaunchesGet": {
+      "Type": "AWS::ApiGateway::Method",
+      "Properties": {
+        "HttpMethod": "GET",
+        "RequestParameters": {},
+        "ResourceId": {
+          "Ref": "ApiGatewayResourceLaunches"
+        },
+        "RestApiId": {
+          "Ref": "ApiGatewayRestApi"
+        },
+        "ApiKeyRequired": false,
+        "AuthorizationType": "NONE",
+        "Integration": {
+          "IntegrationHttpMethod": "POST",
+          "Type": "AWS_PROXY",
+          "Uri": {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":apigateway:",
+                {
+                  "Ref": "AWS::Region"
+                },
+                ":lambda:path/2015-03-31/functions/",
+                {
+                  "Fn::GetAtt": [
+                    "GetLaunchesLambdaFunction",
+                    "Arn"
+                  ]
+                },
+                "/invocations"
+              ]
+            ]
+          }
+        },
+        "MethodResponses": []
+      },
+      "DependsOn": [
+        "GetLaunchesLambdaPermissionApiGateway"
+      ]
+    },
+    "ApiGatewayDeployment1743953022366": {
       "Type": "AWS::ApiGateway::Deployment",
       "Properties": {
         "RestApiId": {
@@ -330,7 +484,9 @@
         "StageName": "dev"
       },
       "DependsOn": [
-        "ApiGatewayMethodRunGet"
+        "ApiGatewayMethodLaunchesOptions",
+        "ApiGatewayMethodRunGet",
+        "ApiGatewayMethodLaunchesGet"
       ]
     },
     "FetchLaunchesLambdaPermissionApiGateway": {
@@ -339,6 +495,43 @@
         "FunctionName": {
           "Fn::GetAtt": [
             "FetchLaunchesLambdaFunction",
+            "Arn"
+          ]
+        },
+        "Action": "lambda:InvokeFunction",
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "/*/*"
+            ]
+          ]
+        }
+      }
+    },
+    "GetLaunchesLambdaPermissionApiGateway": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "GetLaunchesLambdaFunction",
             "Arn"
           ]
         },
@@ -408,10 +601,19 @@
     "FetchLaunchesLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "FetchLaunchesLambdaVersionr8Hgvc5cAjouGJxJIifAZCv2xzQoUXUxnYW4LTVhL0"
+        "Ref": "FetchLaunchesLambdaVersionpHCmvf4T0Xx6QTu4iow6RpcHxGQsgEUMjssmS3OE"
       },
       "Export": {
         "Name": "sls-spacex-launch-service-dev-FetchLaunchesLambdaFunctionQualifiedArn"
+      }
+    },
+    "GetLaunchesLambdaFunctionQualifiedArn": {
+      "Description": "Current Lambda function version",
+      "Value": {
+        "Ref": "GetLaunchesLambdaVersion2kuX3apTh1L1eBod85msjO5HzEiIo3E7XgKggpJ4"
+      },
+      "Export": {
+        "Name": "sls-spacex-launch-service-dev-GetLaunchesLambdaFunctionQualifiedArn"
       }
     },
     "ServiceEndpoint": {

@@ -37,9 +37,18 @@ functions:
       - http:
           path: run
           method: get
+          cors: true
 
     layers:
       - arn:aws:lambda:${self:provider.region}:${aws:accountId}:layer:spacex-deps:1  # Reemplaza con tu ARN real si varía
+  getLaunches:
+    handler: lambdafn.get.handler
+    description: "Returns all launches from DynamoDB"
+    events:
+      - http:
+          path: launches
+          method: get
+          cors: true
 
 resources:
   Resources:
