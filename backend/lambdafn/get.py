@@ -8,7 +8,7 @@ from decimal import Decimal
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table(os.environ['TABLE_NAME'])
 
-# Convertidor para manejar Decimals y tipos no serializables por JSON
+# Convertidor para manejar Decimals 
 class DecimalEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, Decimal):

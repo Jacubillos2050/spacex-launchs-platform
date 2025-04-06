@@ -9,14 +9,14 @@ IS_OFFLINE = os.environ.get('IS_OFFLINE')
 if IS_OFFLINE:
     dynamodb = boto3.resource(
         'dynamodb',
-        region_name='us-east-1',  # región válida obligatoria
+        region_name='us-east-1',  
         endpoint_url='http://localhost:8000'
     )
 else:
     dynamodb = boto3.resource('dynamodb')
 
 # Define la tabla
-table = dynamodb.Table('LaunchesTable')  # Asegúrate de que el nombre coincida con serverless.yml
+table = dynamodb.Table('LaunchesTable')  
 
 # Cache para evitar llamadas duplicadas
 rocket_cache = {}

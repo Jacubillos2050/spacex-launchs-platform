@@ -25,34 +25,34 @@ jobs:
     needs: no-dependency-job
 
     steps:
-      - name: ⬇️ Checkout repo
+      - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: 🟢 Set up Node.js
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: 📦 Install dependencies
+      - name: Install dependencies
         working-directory: frontend
         run: npm install
 
-      - name: 🛠️ Build project
+      - name: Build project
         working-directory: frontend
         run: npm run build
 
-      - name: 🔑 Configure AWS Credentials
+      - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: 🐳 Login to Amazon ECR
+      - name: Login to Amazon ECR
         run: |
           aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com
 
-      - name: 🏗️ Build, tag and push Docker image
+      - name: Build, tag and push Docker image
         run: |
           cd frontend
           docker build -t $ECR_REPOSITORY:latest -t $ECR_REPOSITORY:$IMAGE_TAG .
@@ -61,7 +61,7 @@ jobs:
           docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/$ECR_REPOSITORY:latest
           docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
 
-      - name: 🔄 Render ECS task definition
+      - name: Render ECS task definition
         id: render
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
@@ -69,7 +69,7 @@ jobs:
           container-name: ${{ env.CONTAINER_NAME }}
           image: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
 
-      - name: 🚀 Deploy to ECS
+      - name: Deploy to ECS
         id: deploy
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
@@ -78,11 +78,11 @@ jobs:
           cluster: ${{ env.ECS_CLUSTER }}
           wait-for-service-stability: true
 
-      - name: ✅ Notify Success
+      - name: Notify Success
         if: success()
-        run: echo "Deployment succeeded 🎉"
+        run: echo "Deployment succeeded"
 
-      - name: ⚠️ Rollback hint
+      - name: Rollback hint
         if: failure()
         run: |
-          echo "El despliegue falló. Deberías revisar el log y realizar rollback manual si es necesario."
+          echo "Deployment failed. You should check the logs and perform a manual rollback if necessary."
