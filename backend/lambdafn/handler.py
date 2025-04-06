@@ -4,8 +4,19 @@ import requests
 import boto3
 from botocore.exceptions import ClientError
 
-dynamodb = boto3.resource('dynamodb')
-table = dynamodb.Table(os.environ['TABLE_NAME'])
+IS_OFFLINE = os.environ.get('IS_OFFLINE')
+
+if IS_OFFLINE:
+    dynamodb = boto3.resource(
+        'dynamodb',
+        region_name='us-east-1',  # región válida obligatoria
+        endpoint_url='http://localhost:8000'
+    )
+else:
+    dynamodb = boto3.resource('dynamodb')
+
+# Define la tabla
+table = dynamodb.Table('LaunchesTable')  # Asegúrate de que el nombre coincida con serverless.yml
 
 # Cache para evitar llamadas duplicadas
 rocket_cache = {}
@@ -78,4 +89,3 @@ def main(event, context):
                 'error': str(e)
             })
         }
-

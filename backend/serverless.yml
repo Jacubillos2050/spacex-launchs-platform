@@ -1,5 +1,5 @@
 service: spacex-launch-service
-frameworkVersion: '3'
+frameworkVersion: '>=3.0.0 <4.0.0'
 
 provider:
   name: aws
@@ -11,6 +11,8 @@ provider:
 
   environment:
     TABLE_NAME: ${self:provider.stage}-SpaceXLaunches
+    AWS_ACCESS_KEY_ID: dummy
+    AWS_SECRET_ACCESS_KEY: dummy
 
   iam:
     role:
@@ -23,13 +25,11 @@ provider:
             - dynamodb:Scan
             - dynamodb:DescribeTable
           Resource:
-            - arn:aws:dynamodb:${self:provider.region}:${aws:accountId}:table/${self:provider.stage}-SpaceXLaunches
+            - arn:aws:dynamodb:${self:provider.region}:000000000000:table/${self:provider.stage}-SpaceXLaunches
 
 functions:
   fetchLaunches:
-    handler: lambdafn.handler.main  # Asegúrate que handler.py tenga `def main(event, context)`
-    description: "Fetches SpaceX launches and stores them in DynamoDB"
-
+    handler: lambdafn.handler.main
     events:
       - schedule:
           rate: rate(6 hours)
@@ -39,11 +39,8 @@ functions:
           method: get
           cors: true
 
-    layers:
-      - arn:aws:lambda:${self:provider.region}:${aws:accountId}:layer:spacex-deps:1  # Reemplaza con tu ARN real si varía
   getLaunches:
     handler: lambdafn.get.handler
-    description: "Returns all launches from DynamoDB"
     events:
       - http:
           path: launches
@@ -66,3 +63,17 @@ resources:
         Tags:
           - Key: Project
             Value: SpaceX
+
+plugins:
+  - serverless-offline
+  - serverless-dynamodb-local
+
+custom:
+  dynamodb:
+    stages:
+      - dev
+    start:
+      port: 8000
+      inMemory: true
+      migrate: true
+    installPath: .dynamodb
