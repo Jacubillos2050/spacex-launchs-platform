@@ -1,0 +1,143 @@
+/home/evo/spacex-launch-platform
+├── .coverage
+├── .github
+|  └── workflows
+|     ├── backend.yml
+|     └── frontend.yml
+├── .gitignore
+├── .pytest_cache
+|  ├── .gitignore
+|  ├── CACHEDIR.TAG
+|  ├── README.md
+|  └── v
+|     └── cache
+├── backend
+|  ├── .dynamodb
+|  |  ├── DynamoDBLocal.jar
+|  |  ├── DynamoDBLocal_lib
+|  |  ├── LICENSE.txt
+|  |  ├── README.txt
+|  |  └── THIRD-PARTY-LICENSES.txt
+|  ├── .env
+|  ├── .pytest_cache
+|  |  ├── .gitignore
+|  |  ├── CACHEDIR.TAG
+|  |  ├── README.md
+|  |  └── v
+|  ├── .serverless
+|  |  ├── cloudformation-template-create-stack.json
+|  |  ├── cloudformation-template-update-stack.json
+|  |  ├── serverless-state.json
+|  |  └── spacex-launch-service.zip
+|  ├── Makefile
+|  ├── lambdafn
+|  |  ├── .coverage
+|  |  ├── .pytest_cache
+|  |  ├── __init__.py
+|  |  ├── __pycache__
+|  |  ├── dynamodb_utils.py
+|  |  ├── get.py
+|  |  ├── handler.py
+|  |  ├── layer
+|  |  ├── layer.zip
+|  |  ├── parser.py
+|  |  ├── pytest.ini
+|  |  ├── requirements-dev.txt
+|  |  ├── requirements.txt
+|  |  ├── spacex_client.py
+|  |  ├── tests
+|  |  └── venv
+|  ├── package-lock.json
+|  ├── package.json
+|  ├── serverless.yml
+|  ├── setup-dynamodb.sh
+|  └── venv
+|     ├── bin
+|     ├── include
+|     ├── lib
+|     └── pyvenv.cfg
+├── frontend
+|  ├── .aws
+|  |  └── ecs-task-definition.json
+|  ├── .dockerignore
+|  ├── .gitignore
+|  ├── Dockerfile
+|  ├── README.md
+|  ├── ecs-task-definition.json
+|  ├── network-config.json
+|  ├── nginx.conf
+|  ├── package-lock.json
+|  ├── package.json
+|  ├── public
+|  |  ├── favicon.ico
+|  |  ├── index.html
+|  |  ├── logo192.png
+|  |  ├── logo512.png
+|  |  ├── manifest.json
+|  |  └── robots.txt
+|  ├── src
+|  |  ├── App.css
+|  |  ├── App.js
+|  |  ├── App.test.js
+|  |  ├── index.css
+|  |  ├── index.js
+|  |  ├── logo.svg
+|  |  ├── main.jsx
+|  |  ├── reportWebVitals.js
+|  |  └── setupTests.js
+|  └── vite.config.js
+├── lambdafn
+|  ├── .coverage
+|  ├── .pytest_cache
+|  |  ├── .gitignore
+|  |  ├── CACHEDIR.TAG
+|  |  ├── README.md
+|  |  └── v
+|  ├── __init__.py
+|  ├── __pycache__
+|  |  ├── __init__.cpython-312.pyc
+|  |  ├── dynamodb_utils.cpython-312.pyc
+|  |  ├── handler.cpython-312.pyc
+|  |  └── spacex_parser.cpython-312.pyc
+|  ├── dynamodb_utils.py
+|  ├── handler.py
+|  ├── requirements-dev.txt
+|  ├── spacex_parser.py
+|  └── tests
+|     ├── __init__.py
+|     ├── __pycache__
+|     ├── test_dynamodb_utils.py
+|     ├── test_handler.py
+|     └── test_spacex_parser.py
+├── package-lock.json
+├── package.json
+├── requirements-dev.txt
+├── requirements.txt
+├── spacex-launch-platform-backend.zip
+└── venv
+   ├── bin
+   |  ├── Activate.ps1
+   |  ├── __pycache__
+   |  ├── activate
+   |  ├── activate.csh
+   |  ├── activate.fish
+   |  ├── coverage
+   |  ├── coverage-3.12
+   |  ├── coverage3
+   |  ├── jp.py
+   |  ├── moto_server
+   |  ├── normalizer
+   |  ├── pip
+   |  ├── pip3
+   |  ├── pip3.12
+   |  ├── py.test
+   |  ├── pytest
+   ├── include
+   |  └── python3.12
+   ├── lib
+   |  └── python3.12
+   └── pyvenv.cfg
+
+directory: 1660 file: 134 symboliclink: 5
+
+ignored: directory (4)

@@ -1,13 +1,11 @@
 import boto3
 import os
 
-def upsert_launches(launches, dynamodb=None):
+def upsert_launches(launches, table_name, dynamodb=None):
     if not dynamodb:
         dynamodb = boto3.resource("dynamodb", region_name="us-east-1")
 
-    table_name = os.environ["TABLE_NAME"]
     table = dynamodb.Table(table_name)
-
     inserted = []
 
     for launch in launches:

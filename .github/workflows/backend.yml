@@ -44,7 +44,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report
-          path: backend/lambdafn/coverage.xml
+          path: lambdafn/coverage.xml
 
       # 6. Instalar Serverless Framework manualmente
       - name: Install Serverless CLI

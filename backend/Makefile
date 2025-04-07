@@ -2,14 +2,15 @@
 
 # Tests
 test:
-	PYTHONPATH=src pytest tests
+	PYTHONPATH=. pytest tests
 
 coverage:
-	pytest --cov=src --cov-report=term-missing
+	PYTHONPATH=. pytest --cov=. --cov-report=term-missing
 
+# Limpiar archivos temporales y build
 clean:
 	find . -type d -name '__pycache__' -exec rm -r {} +
-	rm -rf .pytest_cache .coverage layer/ python/ build/ dist/
+	rm -rf .pytest_cache .coverage layer.zip python/ build/ dist/ venv/
 
 # DynamoDB Local
 start-dynamodb:

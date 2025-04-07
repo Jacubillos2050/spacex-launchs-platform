@@ -1,4 +1,4 @@
-from parser import parse_launch
+from lambdafn.parser import parse_launch
 
 def test_parse_launch():
     raw = {
@@ -8,6 +8,8 @@ def test_parse_launch():
         "success": True,
         "launchpad": "padA"
     }
-    parsed = parse_launch(raw)
+    parsed = parse_launch(raw, "Falcon 9", "Pad 39A")
     assert parsed["mission_name"] == "Test Mission"
     assert parsed["status"] == "success"
+    assert parsed["rocket_name"] == "Falcon 9"
+    assert parsed["launchpad"] == "Pad 39A"

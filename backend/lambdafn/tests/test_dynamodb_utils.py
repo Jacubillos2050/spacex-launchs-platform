@@ -1,34 +1,38 @@
-from moto import mock_dynamodb
 import boto3
-import os
-import time
-from lambdafn import dynamodb_utils
+import pytest
+from moto import mock_dynamodb
+from lambdafn.dynamodb_utils import upsert_launches
 
-@mock_dynamodb
-def test_upsert_launches():
-    os.environ["TABLE_NAME"] = "LaunchesTable"
-    dynamodb = boto3.resource("dynamodb", region_name="us-east-1")
+@pytest.fixture
+def dynamodb_table():
+    with mock_dynamodb():
+        client = boto3.client("dynamodb", region_name="us-east-1")
+        client.create_table(
+            TableName="LaunchesTable",
+            KeySchema=[{"AttributeName": "mission_name", "KeyType": "HASH"}],
+            AttributeDefinitions=[{"AttributeName": "mission_name", "AttributeType": "S"}],
+            BillingMode="PAY_PER_REQUEST"
+        )
+        yield boto3.resource("dynamodb", region_name="us-east-1").Table("LaunchesTable")
 
-    table = dynamodb.create_table(
-        TableName="LaunchesTable",
-        KeySchema=[{"AttributeName": "mission_name", "KeyType": "HASH"}],
-        AttributeDefinitions=[{"AttributeName": "mission_name", "AttributeType": "S"}],
-        BillingMode="PAY_PER_REQUEST"
-    )
+def test_upsert_launches(dynamodb_table):
+    data = [
+        {
+            "mission_name": "Test Mission",
+            "launch_date": "2025-04-01T12:00:00.000Z",
+            "rocket_id": "rocket_1",
+            "rocket_name": "Falcon 9",
+            "status": "success",
+            "launchpad_id": "padA",
+            "launchpad": "Pad 39A"
+        }
+    ]
 
-    # Esperar a que la tabla esté lista
-    table.meta.client.get_waiter('table_exists').wait(TableName="LaunchesTable")
-    time.sleep(1)
+    from lambdafn.dynamodb_utils import upsert_launches
+    upsert_launches(data, "LaunchesTable")
 
-    launches = [{
-        "mission_name": "MissionX",
-        "launch_date": "2025",
-        "rocket_id": "rx",
-        "status": "success",
-        "launchpad_id": "pad"
-    }]
+    item = dynamodb_table.get_item(Key={"mission_name": "Test Mission"}).get("Item")
 
-    result = upsert_launches(launches, dynamodb=dynamodb)
-
-    assert result["inserted"] == ["MissionX"]
-    assert result["total"] == 1
+    assert item is not None
+    assert item["rocket_name"] == "Falcon 9"
+    assert item["launchpad"] == "Pad 39A"

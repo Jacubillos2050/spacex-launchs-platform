@@ -3,3 +3,4 @@ coverage
 moto[dynamodb2]
 requests
 boto3
+moto==4.2.8
