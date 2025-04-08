@@ -21,8 +21,8 @@ jobs:
         with:
           python-version: "3.12"
 
-      # 3. Crear entorno virtual 
-      - name: Install dependencies
+      # 3. Instalar dependencias (Python)
+      - name: Install Python dependencies
         run: |
           cd backend/lambdafn
           python -m venv venv
@@ -40,32 +40,37 @@ jobs:
           coverage xml
 
       # 5. Subir reporte de cobertura como artefacto
-      - name: Upload coverage to GitHub summary
+      - name: Upload coverage report
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report
-          path: lambdafn/coverage.xml
+          path: backend/lambdafn/coverage.xml
 
-      # 6. Instalar Serverless Framework manualmente
+      # 6. Instalar Serverless Framework
       - name: Install Serverless CLI
         run: npm install -g serverless
 
-      # 7. Validar y desplegar con Serverless
+      # 7. Validar configuración de Serverless
+      - name: Validate Serverless configuration
+        run: |
+          cd backend
+          serverless config credentials --provider aws --key ${{ secrets.AWS_ACCESS_KEY_ID }} --secret ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          serverless print --stage dev
+
+      # 8. Desplegar con Serverless
       - name: Deploy Lambda to AWS
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
           cd backend
-          sls print --stage dev
-          sls deploy --stage dev
+          serverless deploy --stage dev
 
-      # 8. Éxito
+      # 9. Manejar éxito o fallo
       - name: Deployment successful
         if: success()
         run: echo "Lambda deployment successful"
 
-      # 9. Falla con mensaje
       - name: Deployment failed
         if: failure()
         run: |
